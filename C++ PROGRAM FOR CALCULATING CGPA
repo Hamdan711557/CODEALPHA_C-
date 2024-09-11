@@ -1,0 +1,70 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int numCourses;
+    int totalCredits = 0;
+    double totalGradePoints = 0.0, cgpa = 0.0;
+    char grade;
+
+    // Input number of courses
+    cout << "Enter the number of courses: ";
+    cin >> numCourses;
+
+    // Loop through each course
+    for (int i = 1; i <= numCourses; i++) {
+        int credits;
+        double gradePoint, gradePoints;
+
+        // Input course details
+        cout << "\nCourse " << i << ":" << endl;
+
+        // Input credit hours
+        cout << "Enter credit hours: ";
+        cin >> credits;
+
+        // Input letter grade earned
+        cout << "Enter grade (A, B, C, D, F): ";
+        cin >> grade;
+
+        // Calculate grade points based on the letter grade (on a scale of 10)
+        if (grade == 'A' || grade == 'a') {
+            gradePoint = 10.0;
+        } else if (grade == 'B' || grade == 'b') {
+            gradePoint = 8.0;
+        } else if (grade == 'C' || grade == 'c') {
+            gradePoint = 6.0;
+        } else if (grade == 'D' || grade == 'd') {
+            gradePoint = 4.0;
+        } else if (grade == 'F' || grade == 'f') {
+            gradePoint = 0.0;
+        } else {
+            cout << "Invalid grade entered. Try again." << endl;
+            i--; // Decrement i to redo this course entry
+            continue;
+        }
+
+        // Calculate grade points for the course (credits * gradePoint)
+        gradePoints = credits * gradePoint;
+
+        // Accumulate total credits and total grade points
+        totalCredits += credits;
+        totalGradePoints += gradePoints;
+    }
+
+    // Calculate GPA
+    double gpa = totalGradePoints / totalCredits;
+
+    // Display results
+    cout << "\n--- Results ---" << endl;
+    cout << "Total Credits: " << totalCredits << endl;
+    cout << "Total Grade Points: " << totalGradePoints << endl;
+    cout << "GPA (out of 10): " << gpa << endl;
+
+    // For simplicity, CGPA is assumed to be the same as GPA for one semester
+    cgpa = gpa;
+
+    cout << "CGPA (out of 10): " << cgpa << endl;
+
+    return 0;
+}
