@@ -1,0 +1,232 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ctime>
+
+using namespace std;
+
+// Class to represent a Customer
+class Customer {
+private:
+    string name;
+    int customerId;
+public:
+    Customer(string n, int id) : name(n), customerId(id) {}
+    string getName() { return name; }
+    int getCustomerId() { return customerId; }
+};
+
+// Class to represent an Account
+class Account {
+private:
+    int accountNumber;
+    double balance;
+    Customer* customer;
+    vector<string> transactionHistory;
+
+public:
+    Account(int accNum, Customer* cust) : accountNumber(accNum), customer(cust), balance(0.0) {}
+
+    int getAccountNumber() { return accountNumber; }
+    double getBalance() { return balance; }
+    Customer* getCustomer() { return customer; }
+
+    void deposit(double amount) {
+        balance += amount;
+        logTransaction("Deposit of $" + to_string(amount));
+    }
+
+    bool withdraw(double amount) {
+        if (amount > balance) {
+            cout << "Insufficient funds!" << endl;
+            return false;
+        }
+        balance -= amount;
+        logTransaction("Withdrawal of $" + to_string(amount));
+        return true;
+    }
+
+    bool transfer(Account &toAccount, double amount) {
+        if (amount > balance) {
+            cout << "Insufficient funds for transfer!" << endl;
+            return false;
+        }
+        balance -= amount;
+        toAccount.deposit(amount);
+        logTransaction("Transfer of $" + to_string(amount) + " to account " + to_string(toAccount.getAccountNumber()));
+        return true;
+    }
+
+    void displayAccountInfo() {
+        cout << "Account Number: " << accountNumber << endl;
+        cout << "Customer: " << customer->getName() << endl;
+        cout << "Balance: $" << balance << endl;
+        displayTransactionHistory();
+    }
+
+private:
+    void logTransaction(string transactionDetails) {
+        time_t now = time(0);
+        string dateTime = ctime(&now);  // Get current time as a string
+        transactionHistory.push_back(dateTime + ": " + transactionDetails);
+    }
+
+    void displayTransactionHistory() {
+        cout << "--- Transaction History ---" << endl;
+        for (const string &transaction : transactionHistory) {
+            cout << transaction << endl;
+        }
+        cout << "---------------------------" << endl;
+    }
+};
+
+// Class to handle Banking Services
+class BankingService {
+private:
+    vector<Customer> customers;
+    vector<Account> accounts;
+
+public:
+    // Register a new customer and create an account
+    Account* createAccount() {
+        string customerName;
+        cout << "Enter Customer Name: ";
+        cin.ignore();
+        getline(cin, customerName);
+
+        int newCustomerId = customers.size() + 1;
+        customers.push_back(Customer(customerName, newCustomerId));
+
+        int newAccountNumber = accounts.size() + 1000;  // Simple account number generation
+        Account newAccount(newAccountNumber, &customers.back());
+        accounts.push_back(newAccount);
+
+        cout << "Account created successfully for " << customerName << " with Account Number: " << newAccountNumber << endl;
+        return &accounts.back();
+    }
+
+    // Find account by account number
+    Account* getAccountByNumber(int accountNumber) {
+        for (Account &account : accounts) {
+            if (account.getAccountNumber() == accountNumber) {
+                return &account;
+            }
+        }
+        return nullptr;
+    }
+
+    // Deposit to an account
+    void deposit() {
+        int accountNumber;
+        double amount;
+        cout << "Enter Account Number: ";
+        cin >> accountNumber;
+        Account* account = getAccountByNumber(accountNumber);
+
+        if (account) {
+            cout << "Enter amount to deposit: $";
+            cin >> amount;
+            account->deposit(amount);
+            cout << "Deposited $" << amount << " to Account Number: " << accountNumber << endl;
+        } else {
+            cout << "Account not found!" << endl;
+        }
+    }
+
+    // Withdraw from an account
+    void withdraw() {
+        int accountNumber;
+        double amount;
+        cout << "Enter Account Number: ";
+        cin >> accountNumber;
+        Account* account = getAccountByNumber(accountNumber);
+
+        if (account) {
+            cout << "Enter amount to withdraw: $";
+            cin >> amount;
+            if (account->withdraw(amount)) {
+                cout << "Withdrew $" << amount << " from Account Number: " << accountNumber << endl;
+            }
+        } else {
+            cout << "Account not found!" << endl;
+        }
+    }
+
+    // Transfer between two accounts
+    void transfer() {
+        int fromAccountNumber, toAccountNumber;
+        double amount;
+        cout << "Enter your Account Number: ";
+        cin >> fromAccountNumber;
+        cout << "Enter the Account Number to transfer to: ";
+        cin >> toAccountNumber;
+        Account* fromAccount = getAccountByNumber(fromAccountNumber);
+        Account* toAccount = getAccountByNumber(toAccountNumber);
+
+        if (fromAccount && toAccount) {
+            cout << "Enter amount to transfer: $";
+            cin >> amount;
+            if (fromAccount->transfer(*toAccount, amount)) {
+                cout << "Transferred $" << amount << " from Account " << fromAccountNumber << " to Account " << toAccountNumber << endl;
+            }
+        } else {
+            cout << "One or both accounts not found!" << endl;
+        }
+    }
+
+    // View account information
+    void viewAccountInfo() {
+        int accountNumber;
+        cout << "Enter Account Number: ";
+        cin >> accountNumber;
+        Account* account = getAccountByNumber(accountNumber);
+        if (account) {
+            account->displayAccountInfo();
+        } else {
+            cout << "Account not found!" << endl;
+        }
+    }
+};
+
+// Main program to test the banking system
+int main() {
+    BankingService bank;
+    int choice;
+
+    do {
+        cout << "\n--- Banking System Menu ---\n";
+        cout << "1. Create Account\n";
+        cout << "2. Deposit\n";
+        cout << "3. Withdraw\n";
+        cout << "4. Transfer\n";
+        cout << "5. View Account Info\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                bank.createAccount();
+                break;
+            case 2:
+                bank.deposit();
+                break;
+            case 3:
+                bank.withdraw();
+                break;
+            case 4:
+                bank.transfer();
+                break;
+            case 5:
+                bank.viewAccountInfo();
+                break;
+            case 6:
+                cout << "Exiting..." << endl;
+                break;
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (choice != 6);
+
+    return 0;
+}
