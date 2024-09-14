@@ -1,0 +1,74 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+// Function to register a new user
+void registerUser() {
+    string username, password;
+
+    // Input username and password from user
+    cout << "Enter a username: ";
+    cin >> username;
+    cout << "Enter a password: ";
+    cin >> password;
+
+    // Create and open a file for storing user data
+    ofstream file;
+    file.open("database.txt", ios::app); // Open in append mode so we don't overwrite existing data
+
+    // Save username and password in the file
+    file << username << " " << password << endl;
+    file.close();
+
+    cout << "Registration successful!\n";
+}
+
+// Function to login an existing user
+bool loginUser() {
+    string username, password, u, p;
+    
+    // Input login credentials from the user
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
+
+    // Open file for reading user data
+    ifstream file("database.txt");
+    
+    // Check if the entered username and password match any entry in the file
+    while (file >> u >> p) {
+        if (u == username && p == password) {
+            file.close();
+            return true; // Login successful
+        }
+    }
+    
+    file.close();
+    return false; // Login failed
+}
+
+int main() {
+    int choice;
+    
+    // Main menu for login and registration system
+    cout << "1. Register\n2. Login\nEnter your choice: ";
+    cin >> choice;
+
+    if (choice == 1) {
+        // Registration process
+        registerUser();
+    } else if (choice == 2) {
+        // Login process
+        if (loginUser()) {
+            cout << "Login successful!\n";
+        } else {
+            cout << "Invalid username or password.\n";
+        }
+    } else {
+        cout << "Invalid choice.\n";
+    }
+
+    return 0;
+}
